@@ -25,5 +25,5 @@ You can toggle exactly which notifications you want to dismiss in the Theme Sett
 2. Add the component to your active theme(s)
 
 
-🎵 ## Note
+## 🎵 Note
 More info here: https://meta.discourse.org/t/-/392894/23
