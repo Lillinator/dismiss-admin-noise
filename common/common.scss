@@ -1,0 +1,16 @@
+@if $no_new_features_notifications == "true" {
+  
+  .notification.read.new-features,
+  .notification.unread.new-features {
+    display: none;
+  }
+}
+
+
+@if $no_upcoming_changes_notifications == "true" {
+    
+  .notification.read.upcoming-change-available,
+  .notification.unread.upcoming-change-available {
+    display: none;
+  }
+}
