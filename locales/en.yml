@@ -1,0 +1,6 @@
+en:
+  theme_metadata:
+    description: "Dismiss Admin Noisy Notifications"
+    settings:
+      no_new_features_notifications: "Hide new features notifications in the user menu"
+      no_upcoming_changes_notifications: "Hide upcoming changes notifications in the user menu"
