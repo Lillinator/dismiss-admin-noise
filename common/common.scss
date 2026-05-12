@@ -8,7 +8,9 @@
 
 
 @if $no_upcoming_changes_notifications == "true" {
-    
+  
+  .notification.unread.upcoming-change-automatically-promoted,
+  .notification.read.upcoming-change-automatically-promoted,
   .notification.read.upcoming-change-available,
   .notification.unread.upcoming-change-available {
     display: none;
