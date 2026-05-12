@@ -1,0 +1,8 @@
+{
+  "name": "Dismiss Admin Noise",
+  "component": true,
+  "about_url": "https://meta.discourse.org/t/-/392894/23?u=lilly",
+  "license_url": "https://github.com/Lillinator/dismiss-admin-noise/blob/main/LICENSE",
+  "authors": "@Lillinator",
+  "theme_version": "1.0"
+}
