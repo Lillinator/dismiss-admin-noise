@@ -38,5 +38,3 @@ The following notification can be automatically dismissed in the component admin
 <b><a href="/filter?q=category%3Acustomization%20created-by%3ALilly%20order%3Acreated" />Check out my other Discourse stuff</a></b>
 </small>
 
-## 🎵 Note
-More info here: https://meta.discourse.org/t/-/392894/23
