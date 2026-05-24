@@ -2,7 +2,7 @@ import { apiInitializer } from "discourse/lib/api";
 import { ajax } from "discourse/lib/ajax";
 
 export default apiInitializer("1.8", (api) => {
-  // PERFORMANCE: Short-circuit if both settings are disabled
+
   if (
     !settings.no_new_features_notifications &&
     !settings.no_invitee_accepted_notifications &&
