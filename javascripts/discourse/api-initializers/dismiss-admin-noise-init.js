@@ -5,7 +5,8 @@ export default apiInitializer("1.8", (api) => {
   // PERFORMANCE: Short-circuit if both settings are disabled
   if (
     !settings.no_new_features_notifications &&
-    !settings.no_upcoming_changes_notifications
+    !settings.no_accepted_invites_notifications &&
+    !settings.no_new_badge_notifications
   ) {
     return;
   }
@@ -27,10 +28,22 @@ export default apiInitializer("1.8", (api) => {
       noisyTypes.push(types.new_features);
     }
 
-    if (settings.no_upcoming_changes_notifications) {
-      noisyTypes.push(types.upcoming_change_available);
+    if (settings.no_invitee_accepted_notifications) {
+      noisyTypes.push(types.invitee_accepted);
     }
 
+    if (settings.no_membership_accepted_notifications) {
+      noisyTypes.push(types.membership_request_accepted);
+    }
+    
+    if (settings.no_granted_badge_notifications) {
+      noisyTypes.push(types.granted_badge);
+    }
+
+    if (settings.no_upcoming_change_promoted_notifications) {
+      noisyTypes.push(types.upcoming_change_automatically_promoted);
+    }
+    
     const validNoisyTypes = noisyTypes.filter(Boolean);
 
     // Bail if types aren't found in this Discourse version
