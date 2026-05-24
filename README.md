@@ -18,7 +18,7 @@ The following notification can be automatically dismissed in the component admin
 | `No upcoming change promoted notifications` | Hide notifications for upcoming changes automatically promoted |
 
 
-### :light_bulb: Notes
+### :bulb: Notes
 
 * Only admin users are affected; for example non-admins will still get notified of their granted badges or accepted invites regardless of the settings enabled in this component.
 
