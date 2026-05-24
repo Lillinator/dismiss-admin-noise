@@ -27,7 +27,7 @@ The following notification can be automatically dismissed in the component admin
 * I am not responsible if this component somehow makes you miss an important notification! 
 
 
-## 🔧 Installation
+### 🔧 Installation
 
 1. To install, see [installing a theme component](https://meta.discourse.org/t/how-do-i-install-a-theme-or-theme-component/63682).
 2. Add the component to your active theme(s)
