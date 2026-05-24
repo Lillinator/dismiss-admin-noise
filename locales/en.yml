@@ -1,6 +1,6 @@
 en:
   theme_metadata:
-    description: "Dismiss Admin Noisy Notifications"
+    description: "Dismiss Noisy Admin Notifications"
     settings:
       no_new_features_notifications: "Hide notifications for new features"
       no_invitee_accepted_notifications: "Hide notifications for invitees accepted"
