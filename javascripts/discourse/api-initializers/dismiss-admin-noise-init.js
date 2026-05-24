@@ -15,7 +15,7 @@ export default apiInitializer("1.8", (api) => {
 
   const currentUser = api.getCurrentUser();
 
-  if (!currentUser || currentUser.unread_notifications === 0) {
+  if (!currentUser || !currentUser.admin || currentUser.unread_notifications === 0) {
     return;
   }
 
