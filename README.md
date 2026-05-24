@@ -33,8 +33,3 @@ The following notification can be automatically dismissed in the component admin
 2. Add the component to your active theme(s)
 
 
-***
-<small>
-<b><a href="/filter?q=category%3Acustomization%20created-by%3ALilly%20order%3Acreated" />Check out my other Discourse stuff</a></b>
-</small>
-
