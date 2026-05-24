@@ -5,8 +5,10 @@ export default apiInitializer("1.8", (api) => {
   // PERFORMANCE: Short-circuit if both settings are disabled
   if (
     !settings.no_new_features_notifications &&
-    !settings.no_accepted_invites_notifications &&
-    !settings.no_new_badge_notifications
+    !settings.no_invitee_accepted_notifications &&
+    !settings.no_membership_accepted_notifications &&
+    !settings.no_granted_badge_notifications &&
+    !settings.no_upcoming_change_promoted_notifications
   ) {
     return;
   }
