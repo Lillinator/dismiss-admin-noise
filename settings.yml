@@ -2,6 +2,10 @@ no_new_features_notifications:
   type: bool
   default: true
 
-no_upcoming_changes_notifications:
+no_accepted_invites_notifications:
+  type: bool
+  default: true
+
+no_new_badge_notifications:
   type: bool
   default: true
