@@ -6,13 +6,34 @@
   }
 }
 
+@if $no_invitee_accepted_notifications == "true" {
+  
+  .notification.unread.invitee-accepted,
+  .notification.read.invitee-accepted,
+    display: none;
+  }
+}
 
-@if $no_upcoming_changes_notifications == "true" {
+@if $no_membership_accepted_notifications == "true" {
+  
+  .notification.unread.membership-request-accepted,
+  .notification.read.membership-request-accepted,
+    display: none;
+  }
+}
+
+@if $no_granted_badge_notifications == "true" {
+  
+  .notification.unread.granted-badge,
+  .notification.read.granted-badge,
+    display: none;
+  }
+}
+
+@if $no_upcoming_change_promoted_notifications == "true" {
   
   .notification.unread.upcoming-change-automatically-promoted,
   .notification.read.upcoming-change-automatically-promoted,
-  .notification.read.upcoming-change-available,
-  .notification.unread.upcoming-change-available {
     display: none;
   }
 }
