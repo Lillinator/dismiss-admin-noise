@@ -1,29 +1,42 @@
-# Discourse Dismiss Admin Noise
+# Dismiss Admin Noise
 
-## 👩‍💻 Overview
+### :woman_technologist: Overview
+A lightweight Discourse theme component that automatically dismisses (hides) specific system notifications for admins.
 
-A lightweight Discourse theme component that automatically dismisses system notifications for "New Features" and "Upcoming Changes."
+This component is designed to reduce UI noise and cognitive load—especially helpful for neurodivergent admins (like me), or those who update their instances frequently and track changes via Meta, or just YOLO admins who live on the edge in their development forums! (also like me) :grin:
 
-Because these updates are already indicated with a badge in the admin dashboard sidebar, the user menu notifications are often redundant. This component is designed to reduce UI noise and cognitive load—especially helpful for neurodivergent admins, or those who update their instances frequently and track changes via Meta.
+### :gear: Settings
+The following notification can be automatically dismissed in the component admin settings:
 
-## 💡 Features
 
-- Hides from Dropdown: Uses CSS to completely remove these specific notification rows from the user menu history.
-- Clears Avatar Badges: Uses a lightweight boot initializer to silently mark these notifications as read via the Discourse API, ensuring your unread avatar badge isn't triggered by them.
-- Targeted: Leaves all other important notifications (PMs, mentions, replies) completely untouched.
+|Setting | Description|
+|--- | ---|
+| `No new features notifications` | Hide notifications for new features |
+| `No invitee accepted notifications` | Hide notifications for invitees accepted |
+| `No membership accepted notifications` | Hide notifications for group membership accepted (note: does not affect consolidation of membership notifications) |
+| `No granted badge notifications`  | Hide notifications for granted badges |
+| `No upcoming change promoted notifications` | Hide notifications for upcoming changes automatically promoted |
 
-## ⚙️ Configuration
 
-You can toggle exactly which notifications you want to dismiss in the Theme Settings:
+### :light_bulb: Notes
 
-* `no_new_features_notifications`: Dismisses "New Features" notifications. (Default: `true`)
-* `no_upcoming_changes_notifications`: Dismisses "Upcoming Changes" notifications. (Default: `true`)
+* Only admin users are affected; for example non-admins will still get notified of their granted badges or accepted invites regardless of the settings enabled in this component.
+
+* If all setting are enabled, one can end up with an empty `other notifications tab` or `all notifications tab` depending on how busy their forum notifications are. 
+
+* I am not responsible if this component somehow makes you miss an important notification! 
+
 
 ## 🔧 Installation
 
 1. To install, see [installing a theme component](https://meta.discourse.org/t/how-do-i-install-a-theme-or-theme-component/63682).
 2. Add the component to your active theme(s)
 
+
+***
+<small>
+<b><a href="/filter?q=category%3Acustomization%20created-by%3ALilly%20order%3Acreated" />Check out my other Discourse stuff</a></b>
+</small>
 
 ## 🎵 Note
 More info here: https://meta.discourse.org/t/-/392894/23
