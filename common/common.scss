@@ -1,18 +1,34 @@
 @if $no_new_features_notifications == "true" {
-  
-  .notification.read.new-features,
-  .notification.unread.new-features {
-    display: none;
+  li.user-menu-list-item.new-features,
+  .notification.new-features {
+    display: none !important;
   }
 }
 
+@if $no_invitee_accepted_notifications == "true" {
+  li.user-menu-list-item.invitee-accepted,
+  .notification.invitee-accepted {
+    display: none !important;
+  }
+}
 
-@if $no_upcoming_changes_notifications == "true" {
-  
-  .notification.unread.upcoming-change-automatically-promoted,
-  .notification.read.upcoming-change-automatically-promoted,
-  .notification.read.upcoming-change-available,
-  .notification.unread.upcoming-change-available {
-    display: none;
+@if $no_membership_accepted_notifications == "true" {
+  li.user-menu-list-item.membership-request-accepted,
+  .notification.membership-request-accepted {
+    display: none !important;
+  }
+}
+
+@if $no_granted_badge_notifications == "true" {
+  li.user-menu-list-item.granted-badge,
+  .notification.granted-badge {
+    display: none !important;
+  }
+}
+
+@if $no_upcoming_change_promoted_notifications == "true" {
+  li.user-menu-list-item.upcoming-change-automatically-promoted,
+  .notification.upcoming-change-automatically-promoted {
+    display: none !important;
   }
 }
