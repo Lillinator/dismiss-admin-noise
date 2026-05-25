@@ -32,4 +32,11 @@ The following notification can be automatically dismissed in the component admin
 1. To install, see [installing a theme component](https://meta.discourse.org/t/how-do-i-install-a-theme-or-theme-component/63682).
 2. Add the component to your active theme(s)
 
+---
+
+**Discourse Meta Topic**: https://meta.discourse.org/t/dismiss-admin-noise/403729
+
+**Support**: For issues or feature requests, please post in the [Meta topic](https://meta.discourse.org/t/-/403729) or start a PR on this repo.  
+
+**To hire me or buy me coffee**: visit me on Meta and send me a message: [Lilly@Discourse Meta](https://meta.discourse.org/u/Lilly/summary).
 
