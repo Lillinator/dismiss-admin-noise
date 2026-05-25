@@ -1,9 +1,9 @@
-# Dismiss Admin Noise
+# Dismiss Admin Noise!
 
 ### :woman_technologist: Overview
 A lightweight Discourse theme component that automatically dismisses (hides) specific system notifications for admins.
 
-This component is designed to reduce UI noise and cognitive load—especially helpful for neurodivergent admins (like me), or those who update their instances frequently and track changes via Meta, or just YOLO admins who live on the edge in their development forums! (also like me) :grin:
+This component is designed to reduce UI noise and cognitive load—especially helpful for neurodivergent admins (like me), or those who update their instances frequently and track changes via Discourse Meta (like me), or just YOLO admins who live on the edge in their development forums! (also like me) :grin:
 
 ### :gear: Settings
 The following notification can be automatically dismissed in the component admin settings:
@@ -22,7 +22,7 @@ The following notification can be automatically dismissed in the component admin
 
 * Only admin users are affected; for example non-admins will still get notified of their granted badges or accepted invites regardless of the settings enabled in this component.
 
-* If all setting are enabled, one can end up with an empty `other notifications tab` or `all notifications tab` depending on how busy their forum notifications are. 
+* If all of the component's setting are enabled, one can end up with an empty `other notifications tab` or `all notifications tab` depending on how busy their forum notifications are. 
 
 * I am not responsible if this component somehow makes you miss an important notification! 
 
