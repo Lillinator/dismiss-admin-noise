@@ -21,7 +21,7 @@ export default apiInitializer("1.8", (api) => {
   }
 
   const site = api.container.lookup("service:site");
-  const appEvents = api.container.lookup("service:app-events"); // <-- The Silver Bullet
+  const appEvents = api.container.lookup("service:app-events"); 
   const types = site.notification_types;
 
   const notificationMapping = {
@@ -39,10 +39,14 @@ export default apiInitializer("1.8", (api) => {
     }
   }
 
+  let isProcessing = false;
+
   async function checkAndDismissNoisyNotifications() {
-    if (validNoisyTypes.length === 0 || currentUser.unread_notifications === 0) {
+    if (isProcessing || validNoisyTypes.length === 0 || currentUser.unread_notifications === 0) {
       return;
     }
+
+    isProcessing = true;
 
     try {
       const data = await ajax("/notifications.json");
@@ -56,21 +60,16 @@ export default apiInitializer("1.8", (api) => {
             type: "PUT",
             data: { read: true },
           });
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
 
-        const grouped = currentUser.grouped_unread_notifications || {};
-        notificationsToDismiss.forEach((n) => {
-          if (grouped[n.notification_type] && grouped[n.notification_type] > 0) {
-            grouped[n.notification_type]--;
-          }
-        });
-
-        currentUser.notifyPropertyChange("grouped_unread_notifications");
-        currentUser.notifyPropertyChange("unread_notifications");
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         appEvents.trigger("notifications:changed");
       }
     } catch (e) {
+    } finally {
+      isProcessing = false;
     }
   }
 
