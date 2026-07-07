@@ -39,37 +39,49 @@ export default apiInitializer("1.8", (api) => {
     }
   }
 
-  let isProcessing = false;
+  let dismissRunning = false;
 
   async function checkAndDismissNoisyNotifications() {
-    if (isProcessing || validNoisyTypes.length === 0 || currentUser.unread_notifications === 0) {
+    if (dismissRunning || validNoisyTypes.length === 0) {
       return;
     }
 
-    isProcessing = true;
+    dismissRunning = true;
 
     try {
-      const data = await ajax("/notifications.json");
-      const notificationsToDismiss = data.notifications.filter(
-        (n) => !n.read && validNoisyTypes.includes(n.notification_type)
-      );
+      let foundNoisy = true;
+      let loops = 0;
 
-      if (notificationsToDismiss.length > 0) {
-        for (const n of notificationsToDismiss) {
+      while (foundNoisy && loops < 5) {
+        loops++;
+        
+        const data = await ajax(`/notifications.json?_t=${Date.now()}`);
+        
+        const noisy = data.notifications.filter(
+          (n) => !n.read && validNoisyTypes.includes(n.notification_type)
+        );
+
+        if (noisy.length === 0) {
+          foundNoisy = false;
+          break;
+        }
+
+        for (const n of noisy) {
           await ajax(`/notifications/${n.id}`, {
             type: "PUT",
             data: { read: true },
           });
-          await new Promise((resolve) => setTimeout(resolve, 100));
+          await new Promise((r) => setTimeout(r, 100));
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        appEvents.trigger("notifications:changed");
+        await new Promise((r) => setTimeout(r, 500));
       }
+
+      appEvents.trigger("notifications:changed");
+
     } catch (e) {
     } finally {
-      isProcessing = false;
+      dismissRunning = false; 
     }
   }
 
