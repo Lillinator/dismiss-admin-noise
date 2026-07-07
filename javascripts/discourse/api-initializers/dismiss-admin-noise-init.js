@@ -1,26 +1,10 @@
 import { apiInitializer } from "discourse/lib/api";
 import { ajax } from "discourse/lib/ajax";
-import { debounce } from "@ember/runloop"; 
+import { debounce } from "@ember/runloop";
 
 export default apiInitializer("1.8", (api) => {
   const currentUser = api.getCurrentUser();
 
-  if (
-    settings.no_review_queue_badges && 
-    currentUser.admin && 
-    !currentUser.moderator
-  ) {
-    if (currentUser.reviewable_count > 0) {
-      currentUser.set("reviewable_count", 0);
-    }
-
-    currentUser.addObserver("reviewable_count", () => {
-      if (currentUser.reviewable_count > 0) {
-        currentUser.set("reviewable_count", 0);
-      }
-    });
-  }
-  
   if (!currentUser || !currentUser.admin) {
     return;
   }
@@ -44,36 +28,28 @@ export default apiInitializer("1.8", (api) => {
     }
   }
 
-  if (validNoisyTypes.length === 0) {
-    return;
-  }
-
-  function checkAndDismissNoisyNotifications() {
-    if (currentUser.unread_notifications === 0) {
+  async function checkAndDismissNoisyNotifications() {
+    if (validNoisyTypes.length === 0 || currentUser.unread_notifications === 0) {
       return;
     }
 
-    ajax("/notifications.json").then((data) => {
+    try {
+      const data = await ajax("/notifications.json");
       const notificationsToDismiss = data.notifications.filter(
         (n) => !n.read && validNoisyTypes.includes(n.notification_type)
       );
 
       if (notificationsToDismiss.length > 0) {
-        notificationsToDismiss.forEach((n) => {
-          ajax(`/notifications/${n.id}`, {
+        for (const n of notificationsToDismiss) {
+          await ajax(`/notifications/${n.id}`, {
             type: "PUT",
             data: { read: true },
-          }).then(() => {
-            if (currentUser.unread_notifications > 0) {
-              currentUser.set(
-                "unread_notifications",
-                currentUser.unread_notifications - 1
-              );
-            }
           });
-        });
+        }
+        
       }
-    });
+    } catch (e) {
+    }
   }
 
   function debouncedCheck() {
@@ -82,8 +58,17 @@ export default apiInitializer("1.8", (api) => {
 
   debouncedCheck();
 
-  currentUser.addObserver(
-    "unread_notifications",
-    debouncedCheck
-  );
+  currentUser.addObserver("unread_notifications", debouncedCheck);
+
+  if (settings.no_review_queue_badges && !currentUser.moderator) {
+    if (currentUser.reviewable_count > 0) {
+      currentUser.set("reviewable_count", 0);
+    }
+
+    currentUser.addObserver("reviewable_count", () => {
+      if (currentUser.reviewable_count > 0) {
+        currentUser.set("reviewable_count", 0);
+      }
+    });
+  }
 });
