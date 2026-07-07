@@ -9,6 +9,17 @@ export default apiInitializer("1.8", (api) => {
     return;
   }
 
+  if (settings.no_review_queue_badges && !currentUser.moderator) {
+    if (currentUser.reviewable_count > 0) {
+      currentUser.set("reviewable_count", 0);
+    }
+    currentUser.addObserver("reviewable_count", () => {
+      if (currentUser.reviewable_count > 0) {
+        currentUser.set("reviewable_count", 0);
+      }
+    });
+  }
+
   const site = api.container.lookup("service:site");
   const types = site.notification_types;
 
@@ -35,34 +46,18 @@ export default apiInitializer("1.8", (api) => {
 
     try {
       const data = await ajax("/notifications.json");
+      
       const notificationsToDismiss = data.notifications.filter(
         (n) => !n.read && validNoisyTypes.includes(n.notification_type)
       );
 
       if (notificationsToDismiss.length > 0) {
-        const dismissedCounts = {};
-
         for (const n of notificationsToDismiss) {
           await ajax(`/notifications/${n.id}`, {
             type: "PUT",
             data: { read: true },
           });
-
-          dismissedCounts[n.notification_type] = (dismissedCounts[n.notification_type] || 0) + 1;
         }
-
-        if (currentUser.grouped_unread_notifications) {
-          const updatedGrouped = { ...currentUser.grouped_unread_notifications };
-
-          for (const [type, count] of Object.entries(dismissedCounts)) {
-            if (updatedGrouped[type]) {
-              updatedGrouped[type] = Math.max(0, updatedGrouped[type] - count);
-            }
-          }
-          currentUser.set("grouped_unread_notifications", updatedGrouped);
-          currentUser.notifyPropertyChange("grouped_unread_notifications");
-        }
-        currentUser.notifyPropertyChange("unread_notifications");
       }
     } catch (e) {
     }
@@ -73,18 +68,5 @@ export default apiInitializer("1.8", (api) => {
   }
 
   debouncedCheck();
-
   currentUser.addObserver("unread_notifications", debouncedCheck);
-
-  if (settings.no_review_queue_badges && !currentUser.moderator) {
-    if (currentUser.reviewable_count > 0) {
-      currentUser.set("reviewable_count", 0);
-    }
-
-    currentUser.addObserver("reviewable_count", () => {
-      if (currentUser.reviewable_count > 0) {
-        currentUser.set("reviewable_count", 0);
-      }
-    });
-  }
 });
