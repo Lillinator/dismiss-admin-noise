@@ -1,5 +1,6 @@
 import { apiInitializer } from "discourse/lib/api";
 import { ajax } from "discourse/lib/ajax";
+import { debounce } from "@ember/runloop"; 
 
 export default apiInitializer("1.8", (api) => {
   const currentUser = api.getCurrentUser();
@@ -31,9 +32,7 @@ export default apiInitializer("1.8", (api) => {
     return;
   }
 
-
   function checkAndDismissNoisyNotifications() {
-
     if (currentUser.unread_notifications === 0) {
       return;
     }
@@ -49,7 +48,6 @@ export default apiInitializer("1.8", (api) => {
             type: "PUT",
             data: { read: true },
           }).then(() => {
-
             if (currentUser.unread_notifications > 0) {
               currentUser.set(
                 "unread_notifications",
@@ -62,10 +60,14 @@ export default apiInitializer("1.8", (api) => {
     });
   }
 
-  checkAndDismissNoisyNotifications();
+  function debouncedCheck() {
+    debounce(null, checkAndDismissNoisyNotifications, 2000);
+  }
+
+  debouncedCheck();
 
   currentUser.addObserver(
     "unread_notifications",
-    checkAndDismissNoisyNotifications
+    debouncedCheck
   );
 });
