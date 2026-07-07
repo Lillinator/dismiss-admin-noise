@@ -5,6 +5,22 @@ import { debounce } from "@ember/runloop";
 export default apiInitializer("1.8", (api) => {
   const currentUser = api.getCurrentUser();
 
+  if (
+    settings.no_review_queue_badges && 
+    currentUser.admin && 
+    !currentUser.moderator
+  ) {
+    if (currentUser.reviewable_count > 0) {
+      currentUser.set("reviewable_count", 0);
+    }
+
+    currentUser.addObserver("reviewable_count", () => {
+      if (currentUser.reviewable_count > 0) {
+        currentUser.set("reviewable_count", 0);
+      }
+    });
+  }
+  
   if (!currentUser || !currentUser.admin) {
     return;
   }
