@@ -1,6 +1,5 @@
 import { apiInitializer } from "discourse/lib/api";
 import { ajax } from "discourse/lib/ajax";
-import { debounce } from "@ember/runloop";
 
 export default apiInitializer("1.8", (api) => {
   const currentUser = api.getCurrentUser();
@@ -10,18 +9,16 @@ export default apiInitializer("1.8", (api) => {
   }
 
   if (settings.no_review_queue_badges && !currentUser.moderator) {
-    if (currentUser.reviewable_count > 0) {
-      currentUser.set("reviewable_count", 0);
-    }
-    currentUser.addObserver("reviewable_count", () => {
+    const wipeReviewable = () => {
       if (currentUser.reviewable_count > 0) {
         currentUser.set("reviewable_count", 0);
       }
-    });
+    };
+    currentUser.addObserver("reviewable_count", wipeReviewable);
+    wipeReviewable();
   }
 
   const site = api.container.lookup("service:site");
-  const appEvents = api.container.lookup("service:app-events"); 
   const types = site.notification_types;
 
   const notificationMapping = {
@@ -33,62 +30,79 @@ export default apiInitializer("1.8", (api) => {
   };
 
   const validNoisyTypes = [];
-  for (const [settingName, typeId] of Object.entries(notificationMapping)) {
-    if (settings[settingName] && typeId !== undefined) {
-      validNoisyTypes.push(typeId);
+  for (const [key, id] of Object.entries(notificationMapping)) {
+    if (settings[key] && id !== undefined) validNoisyTypes.push(id);
+  }
+
+  if (validNoisyTypes.length === 0) return;
+
+  let isEnforcing = false;
+
+  function enforceCleanUI() {
+    if (isEnforcing || !currentUser.grouped_unread_notifications) return;
+
+    let dirty = false;
+    let subtractAmount = 0;
+    
+    const cleanGrouped = { ...currentUser.grouped_unread_notifications };
+
+    for (const type of validNoisyTypes) {
+      if (cleanGrouped[type] > 0) {
+        subtractAmount += cleanGrouped[type];
+        cleanGrouped[type] = 0; 
+        dirty = true;
+      }
+    }
+
+    if (dirty) {
+      isEnforcing = true;
+      
+      currentUser.set("grouped_unread_notifications", cleanGrouped);
+      
+      currentUser.set(
+        "unread_notifications",
+        Math.max(0, currentUser.unread_notifications - subtractAmount)
+      );
+      
+      isEnforcing = false;
+
+      triggerBackgroundCleanup();
     }
   }
 
-  let dismissRunning = false;
+  let isCleaning = false;
+  let needsAnotherPass = false;
 
-  async function checkAndDismissNoisyNotifications() {
-    if (dismissRunning || validNoisyTypes.length === 0) {
+  async function triggerBackgroundCleanup() {
+    if (isCleaning) {
+      needsAnotherPass = true;
       return;
     }
-
-    dismissRunning = true;
+    
+    isCleaning = true;
 
     try {
-      let foundNoisy = true;
-      let loops = 0;
-
-      while (foundNoisy && loops < 5) {
-        loops++;
+      do {
+        needsAnotherPass = false;
         
-        const data = await ajax(`/notifications.json?_t=${Date.now()}`);
-        
+        const data = await ajax(`/notifications.json`);
         const noisy = data.notifications.filter(
           (n) => !n.read && validNoisyTypes.includes(n.notification_type)
         );
 
-        if (noisy.length === 0) {
-          foundNoisy = false;
-          break;
-        }
-
         for (const n of noisy) {
-          await ajax(`/notifications/${n.id}`, {
-            type: "PUT",
-            data: { read: true },
-          });
-          await new Promise((r) => setTimeout(r, 100));
+          await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
+          await new Promise((r) => setTimeout(r, 100)); // Be gentle to the server
         }
-
-        await new Promise((r) => setTimeout(r, 500));
-      }
-
-      appEvents.trigger("notifications:changed");
-
+      } while (needsAnotherPass); 
     } catch (e) {
     } finally {
-      dismissRunning = false; 
+      isCleaning = false;
     }
   }
 
-  function debouncedCheck() {
-    debounce(null, checkAndDismissNoisyNotifications, 2000);
-  }
-
-  debouncedCheck();
-  currentUser.addObserver("unread_notifications", debouncedCheck);
+  currentUser.addObserver("grouped_unread_notifications", enforceCleanUI);
+  currentUser.addObserver("unread_notifications", enforceCleanUI);
+  
+  enforceCleanUI();
 });
