@@ -40,20 +40,29 @@ export default apiInitializer("1.8", (api) => {
       );
 
       if (notificationsToDismiss.length > 0) {
+        const dismissedCounts = {};
+
         for (const n of notificationsToDismiss) {
           await ajax(`/notifications/${n.id}`, {
             type: "PUT",
             data: { read: true },
           });
+
+          dismissedCounts[n.notification_type] = (dismissedCounts[n.notification_type] || 0) + 1;
         }
-        
-        const session = await ajax("/session/current.json");
-        if (session && session.current_user) {
-          currentUser.setProperties({
-            unread_notifications: session.current_user.unread_notifications,
-            grouped_unread_notifications: session.current_user.grouped_unread_notifications,
-          });
+
+        if (currentUser.grouped_unread_notifications) {
+          const updatedGrouped = { ...currentUser.grouped_unread_notifications };
+
+          for (const [type, count] of Object.entries(dismissedCounts)) {
+            if (updatedGrouped[type]) {
+              updatedGrouped[type] = Math.max(0, updatedGrouped[type] - count);
+            }
+          }
+          currentUser.set("grouped_unread_notifications", updatedGrouped);
+          currentUser.notifyPropertyChange("grouped_unread_notifications");
         }
+        currentUser.notifyPropertyChange("unread_notifications");
       }
     } catch (e) {
     }
