@@ -21,6 +21,7 @@ export default apiInitializer("1.8", (api) => {
   }
 
   const site = api.container.lookup("service:site");
+  const appEvents = api.container.lookup("service:app-events"); // <-- The Silver Bullet
   const types = site.notification_types;
 
   const notificationMapping = {
@@ -32,7 +33,6 @@ export default apiInitializer("1.8", (api) => {
   };
 
   const validNoisyTypes = [];
-
   for (const [settingName, typeId] of Object.entries(notificationMapping)) {
     if (settings[settingName] && typeId !== undefined) {
       validNoisyTypes.push(typeId);
@@ -46,7 +46,6 @@ export default apiInitializer("1.8", (api) => {
 
     try {
       const data = await ajax("/notifications.json");
-      
       const notificationsToDismiss = data.notifications.filter(
         (n) => !n.read && validNoisyTypes.includes(n.notification_type)
       );
@@ -58,6 +57,18 @@ export default apiInitializer("1.8", (api) => {
             data: { read: true },
           });
         }
+
+        const grouped = currentUser.grouped_unread_notifications || {};
+        notificationsToDismiss.forEach((n) => {
+          if (grouped[n.notification_type] && grouped[n.notification_type] > 0) {
+            grouped[n.notification_type]--;
+          }
+        });
+
+        currentUser.notifyPropertyChange("grouped_unread_notifications");
+        currentUser.notifyPropertyChange("unread_notifications");
+
+        appEvents.trigger("notifications:changed");
       }
     } catch (e) {
     }
