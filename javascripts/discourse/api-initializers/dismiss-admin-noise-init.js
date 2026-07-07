@@ -47,6 +47,13 @@ export default apiInitializer("1.8", (api) => {
           });
         }
         
+        const session = await ajax("/session/current.json");
+        if (session && session.current_user) {
+          currentUser.setProperties({
+            unread_notifications: session.current_user.unread_notifications,
+            grouped_unread_notifications: session.current_user.grouped_unread_notifications,
+          });
+        }
       }
     } catch (e) {
     }
