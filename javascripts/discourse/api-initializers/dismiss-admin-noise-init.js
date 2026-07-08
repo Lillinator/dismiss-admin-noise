@@ -38,31 +38,50 @@ export default apiInitializer("1.8", (api) => {
 
   if (validNoisyTypes.length === 0) return;
 
-  async function performBackgroundCleanup() {
-    try {
-      const data = await ajax(`/notifications.json?_t=${Date.now()}`);
-      
-      const noisy = data.notifications.filter(
-        (n) => !n.read && validNoisyTypes.includes(n.notification_type)
-      );
+  let isCleaning = false;
 
-      if (noisy.length > 0) {
-        for (const n of noisy) {
-          await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
+  async function performBackgroundCleanup() {
+    if (isCleaning) return;
+    isCleaning = true;
+
+    try {
+      let foundNoisy = true;
+      let loops = 0;
+
+      while (foundNoisy && loops < 10) {
+        loops++;
+        
+        const data = await ajax(`/notifications.json?_t=${Date.now()}`);
+        
+        const noisy = data.notifications.filter(
+          (n) => !n.read && validNoisyTypes.includes(n.notification_type)
+        );
+
+        if (noisy.length === 0) {
+          foundNoisy = false;
+          break; 
         }
 
-        await new Promise((r) => setTimeout(r, 500));
-
-        currentUser.notifyPropertyChange("grouped_unread_notifications");
-        appEvents.trigger("notifications:changed");
+        for (const n of noisy) {
+          await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
+          await new Promise(r => setTimeout(r, 50)); // Avoid rate limits
+        }
       }
+
+      await new Promise(r => setTimeout(r, 600));
+
+      currentUser.notifyPropertyChange("grouped_unread_notifications");
+      appEvents.trigger("notifications:changed");
+
     } catch (e) {
+    } finally {
+      isCleaning = false;
     }
   }
 
   function scheduleCleanup() {
     if (currentUser.unread_notifications > 0) {
-      debounce(null, performBackgroundCleanup, 1000);
+      debounce(null, performBackgroundCleanup, 500);
     }
   }
 
