@@ -34,7 +34,7 @@
 }
 
 @if $no_review_queue_badges == "true" {
-  li.user-menu-reviewable-item {
+  li.reviewable-pending {
     display: none !important;
   }
 }
