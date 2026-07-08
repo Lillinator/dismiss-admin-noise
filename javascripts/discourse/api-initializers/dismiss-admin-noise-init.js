@@ -9,36 +9,6 @@ export default apiInitializer("1.8", (api) => {
     return;
   }
   
-  if (settings.no_review_queue_badges) {
-    const wipeReviewable = () => {
-      let dirty = false;
-
-      if (currentUser.reviewable_count > 0) {
-        currentUser.updateReviewableCount(0);
-        dirty = true;
-      }
-
-      if (currentUser.unread_high_priority_notifications > 0) {
-        currentUser.set("unread_high_priority_notifications", 0);
-        dirty = true;
-      }
-
-      if (currentUser.all_unread_notifications_count > 0) {
-        currentUser.set("all_unread_notifications_count", 0);
-        dirty = true;
-      }
-
-      if (dirty) {
-        api.container.lookup("service:app-events").trigger("notifications:changed");
-      }
-    };
-    
-    currentUser.addObserver("reviewable_count", wipeReviewable);
-    currentUser.addObserver("unread_high_priority_notifications", wipeReviewable);
-    
-    wipeReviewable();
-  }
-  
   const site = api.container.lookup("service:site");
   const appEvents = api.container.lookup("service:app-events");
 
