@@ -43,31 +43,29 @@ export default apiInitializer("1.8", (api) => {
     if (isEnforcing || !currentUser.grouped_unread_notifications) return;
 
     let dirty = false;
-    let subtractAmount = 0;
-    
+    let remainingLegitSum = 0;
     const cleanGrouped = { ...currentUser.grouped_unread_notifications };
 
     for (const type of validNoisyTypes) {
       if (cleanGrouped[type] > 0) {
-        subtractAmount += cleanGrouped[type];
         cleanGrouped[type] = 0; 
         dirty = true;
       }
+    }
+
+    for (const count of Object.values(cleanGrouped)) {
+      remainingLegitSum += count;
     }
 
     if (dirty) {
       isEnforcing = true;
       
       currentUser.set("grouped_unread_notifications", cleanGrouped);
-      currentUser.set(
-        "unread_notifications",
-        Math.max(0, currentUser.unread_notifications - subtractAmount)
-      );
-
+      currentUser.set("unread_notifications", remainingLegitSum);
+      
       appEvents.trigger("notifications:changed");
       
       isEnforcing = false;
-
       triggerBackgroundCleanup();
     }
   }
@@ -95,12 +93,25 @@ export default apiInitializer("1.8", (api) => {
         if (noisy.length > 0) {
           for (const n of noisy) {
             await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
-            await new Promise((r) => setTimeout(r, 100)); 
+            await new Promise((r) => setTimeout(r, 50)); 
           }
           needsAnotherPass = true; 
         }
       } while (needsAnotherPass); 
       
+      await new Promise((r) => setTimeout(r, 500));
+      
+      const session = await ajax(`/session/current.json?_t=${Date.now()}`);
+      
+      if (session && session.current_user) {
+        isEnforcing = true; 
+        currentUser.setProperties({
+          unread_notifications: session.current_user.unread_notifications,
+          grouped_unread_notifications: session.current_user.grouped_unread_notifications,
+        });
+        isEnforcing = false;
+        appEvents.trigger("notifications:changed");
+      }
 
     } catch (e) {
     } finally {
