@@ -16,11 +16,12 @@ The following notification can be automatically dismissed in the component admin
 | `No membership accepted notifications` | Hide notifications for group membership accepted (note: does not affect consolidation of membership notifications) |
 | `No granted badge notifications`  | Hide notifications for granted badges |
 | `No upcoming change promoted notifications` | Hide notifications for upcoming changes automatically promoted |
+| `No review queue badges` | Hide notifications for reviewable flags if admin is NOT a member of the moderator group |
 
 
 ### :bulb: Notes
 
-* Only admin users are affected; for example non-admins will still get notified of their granted badges or accepted invites regardless of the settings enabled in this component.
+* Only admin users are affected; for example non-admins will still get notified of their granted badges or accepted invites regardless of the settings enabled in this component.  Note that the `No review queue badges`  settings only affects the flag notifications if the admin is NOT a member of the moderator group.
 
 * If all of the component's setting are enabled, one can end up with an empty `other notifications tab` or `all notifications tab` depending on how busy their forum notifications are. 
 
