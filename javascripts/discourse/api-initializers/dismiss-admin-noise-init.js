@@ -1,6 +1,5 @@
 import { apiInitializer } from "discourse/lib/api";
 import { ajax } from "discourse/lib/ajax";
-import { debounce } from "@ember/runloop";
 
 export default apiInitializer("1.8", (api) => {
   const currentUser = api.getCurrentUser();
@@ -38,40 +37,70 @@ export default apiInitializer("1.8", (api) => {
 
   if (validNoisyTypes.length === 0) return;
 
-  let isCleaning = false;
+  let isEnforcing = false;
 
-  async function performBackgroundCleanup() {
-    if (isCleaning) return;
+  function enforceCleanUI() {
+    if (isEnforcing || !currentUser.grouped_unread_notifications) return;
+
+    let dirty = false;
+    let subtractAmount = 0;
+    
+    const cleanGrouped = { ...currentUser.grouped_unread_notifications };
+
+    for (const type of validNoisyTypes) {
+      if (cleanGrouped[type] > 0) {
+        subtractAmount += cleanGrouped[type];
+        cleanGrouped[type] = 0; 
+        dirty = true;
+      }
+    }
+
+    if (dirty) {
+      isEnforcing = true;
+      
+      currentUser.set("grouped_unread_notifications", cleanGrouped);
+      currentUser.set(
+        "unread_notifications",
+        Math.max(0, currentUser.unread_notifications - subtractAmount)
+      );
+
+      appEvents.trigger("notifications:changed");
+      
+      isEnforcing = false;
+
+      triggerBackgroundCleanup();
+    }
+  }
+
+  let isCleaning = false;
+  let needsAnotherPass = false;
+
+  async function triggerBackgroundCleanup() {
+    if (isCleaning) {
+      needsAnotherPass = true;
+      return;
+    }
+    
     isCleaning = true;
 
     try {
-      let foundNoisy = true;
-      let loops = 0;
-
-      while (foundNoisy && loops < 10) {
-        loops++;
+      do {
+        needsAnotherPass = false;
         
         const data = await ajax(`/notifications.json?_t=${Date.now()}`);
-        
         const noisy = data.notifications.filter(
           (n) => !n.read && validNoisyTypes.includes(n.notification_type)
         );
 
-        if (noisy.length === 0) {
-          foundNoisy = false;
-          break; 
+        if (noisy.length > 0) {
+          for (const n of noisy) {
+            await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
+            await new Promise((r) => setTimeout(r, 100)); 
+          }
+          needsAnotherPass = true; 
         }
-
-        for (const n of noisy) {
-          await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
-          await new Promise(r => setTimeout(r, 50)); // Avoid rate limits
-        }
-      }
-
-      await new Promise(r => setTimeout(r, 600));
-
-      currentUser.notifyPropertyChange("grouped_unread_notifications");
-      appEvents.trigger("notifications:changed");
+      } while (needsAnotherPass); 
+      
 
     } catch (e) {
     } finally {
@@ -79,12 +108,8 @@ export default apiInitializer("1.8", (api) => {
     }
   }
 
-  function scheduleCleanup() {
-    if (currentUser.unread_notifications > 0) {
-      debounce(null, performBackgroundCleanup, 500);
-    }
-  }
-
-  scheduleCleanup();
-  currentUser.addObserver("unread_notifications", scheduleCleanup);
+  currentUser.addObserver("grouped_unread_notifications", enforceCleanUI);
+  currentUser.addObserver("unread_notifications", enforceCleanUI);
+  
+  enforceCleanUI();
 });
