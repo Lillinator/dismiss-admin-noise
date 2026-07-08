@@ -17,3 +17,7 @@ no_granted_badge_notifications:
 no_upcoming_change_promoted_notifications:
   type: bool
   default: true
+
+no_review_queue_badges:
+  type: bool
+  default: true

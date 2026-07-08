@@ -32,3 +32,18 @@
     display: none !important;
   }
 }
+
+@if $no_review_queue_badges == "true" {
+  li.reviewable.pending {
+    display: none !important;
+  }
+
+  .current-user .badge-notification.new-reviewables {
+    display: none !important;
+  }
+
+    #user-menu-button-review-queue .badge-notification {
+    display: none !important;
+  }
+
+}

@@ -1,5 +1,6 @@
 import { apiInitializer } from "discourse/lib/api";
 import { ajax } from "discourse/lib/ajax";
+import { debounce } from "@ember/runloop";
 
 export default apiInitializer("1.8", (api) => {
   const currentUser = api.getCurrentUser();
@@ -7,65 +8,60 @@ export default apiInitializer("1.8", (api) => {
   if (!currentUser || !currentUser.admin) {
     return;
   }
-
+  
   const site = api.container.lookup("service:site");
-  const types = site.notification_types;
+  const appEvents = api.container.lookup("service:app-events");
 
-  const notificationMapping = {
-    no_new_features_notifications: types.new_features,
-    no_invitee_accepted_notifications: types.invitee_accepted,
-    no_membership_accepted_notifications: types.membership_request_accepted,
-    no_granted_badge_notifications: types.granted_badge,
-    no_upcoming_change_promoted_notifications: types.upcoming_change_automatically_promoted,
-  };
+  const activeDismissTypes = [];
+  if (settings.no_new_features_notifications) activeDismissTypes.push("new_features");
+  if (settings.no_invitee_accepted_notifications) activeDismissTypes.push("invitee_accepted");
+  if (settings.no_membership_accepted_notifications) activeDismissTypes.push("membership_request_accepted");
+  if (settings.no_granted_badge_notifications) activeDismissTypes.push("granted_badge");
+  if (settings.no_upcoming_change_promoted_notifications) activeDismissTypes.push("upcoming_change_automatically_promoted");
 
-  const validNoisyTypes = [];
+  if (activeDismissTypes.length === 0) return;
 
-  for (const [settingName, typeId] of Object.entries(notificationMapping)) {
-    if (settings[settingName] && typeId !== undefined) {
-      validNoisyTypes.push(typeId);
-    }
-  }
+  let isCleaning = false;
 
-  if (validNoisyTypes.length === 0) {
-    return;
-  }
+  async function bulkDismissNoisyNotifications() {
+    if (isCleaning || currentUser.unread_notifications === 0) return;
+    isCleaning = true;
 
+    try {
+      await ajax("/notifications/mark-read", {
+        type: "PUT",
+        data: { dismiss_types: activeDismissTypes.join(",") },
+      });
 
-  function checkAndDismissNoisyNotifications() {
+      const unreadHash = { ...currentUser.grouped_unread_notifications };
+      let removedCount = 0;
 
-    if (currentUser.unread_notifications === 0) {
-      return;
-    }
+      activeDismissTypes.forEach((type) => {
+        const typeId = site.notification_types[type];
+        if (typeId && unreadHash[typeId] > 0) {
+          removedCount += unreadHash[typeId];
+          delete unreadHash[typeId];
+        }
+      });
 
-    ajax("/notifications.json").then((data) => {
-      const notificationsToDismiss = data.notifications.filter(
-        (n) => !n.read && validNoisyTypes.includes(n.notification_type)
+      currentUser.set("grouped_unread_notifications", unreadHash);
+      currentUser.set(
+        "unread_notifications", 
+        Math.max(0, currentUser.unread_notifications - removedCount)
       );
 
-      if (notificationsToDismiss.length > 0) {
-        notificationsToDismiss.forEach((n) => {
-          ajax(`/notifications/${n.id}`, {
-            type: "PUT",
-            data: { read: true },
-          }).then(() => {
+      appEvents.trigger("notifications:changed");
 
-            if (currentUser.unread_notifications > 0) {
-              currentUser.set(
-                "unread_notifications",
-                currentUser.unread_notifications - 1
-              );
-            }
-          });
-        });
-      }
-    });
+    } catch (e) {
+    } finally {
+      isCleaning = false;
+    }
   }
 
-  checkAndDismissNoisyNotifications();
+  function scheduleCleanup() {
+    debounce(null, bulkDismissNoisyNotifications, 1000);
+  }
 
-  currentUser.addObserver(
-    "unread_notifications",
-    checkAndDismissNoisyNotifications
-  );
+  scheduleCleanup();
+  currentUser.addObserver("unread_notifications", scheduleCleanup);
 });
