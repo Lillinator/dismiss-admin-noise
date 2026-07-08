@@ -8,10 +8,13 @@ export default apiInitializer("1.8", (api) => {
   if (!currentUser || !currentUser.admin) {
     return;
   }
-  
+
+  if (settings.no_review_queue_badges && !currentUser.moderator) {
+    document.body.classList.add("hide-admin-review-queue");
+  }
+
   const site = api.container.lookup("service:site");
   const appEvents = api.container.lookup("service:app-events");
-
   const activeDismissTypes = [];
   if (settings.no_new_features_notifications) activeDismissTypes.push("new_features");
   if (settings.no_invitee_accepted_notifications) activeDismissTypes.push("invitee_accepted");
