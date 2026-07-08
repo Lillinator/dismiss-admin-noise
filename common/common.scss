@@ -37,4 +37,9 @@
   li.reviewable.pending {
     display: none !important;
   }
+
+  .header-dropdown-toggle.current-user .badge-notification.unread-high-priority-notifications,
+  .header-dropdown-toggle.current-user .badge-notification.reviewable-count {
+    display: none !important;
+  }
 }
