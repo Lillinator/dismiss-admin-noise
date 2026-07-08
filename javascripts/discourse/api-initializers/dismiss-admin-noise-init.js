@@ -12,20 +12,14 @@ export default apiInitializer("1.8", (api) => {
   if (settings.no_review_queue_badges) {
     const wipeReviewable = () => {
       if (currentUser.reviewable_count > 0) {
-        currentUser.set("reviewable_count", 0);
-      }
-      
-      if (currentUser.unread_high_priority_notifications > 0) {
-        currentUser.set("unread_high_priority_notifications", 0);
+        currentUser.updateReviewableCount(0);
       }
     };
     
     currentUser.addObserver("reviewable_count", wipeReviewable);
-    currentUser.addObserver("unread_high_priority_notifications", wipeReviewable);
     
     wipeReviewable();
   }
-
   const site = api.container.lookup("service:site");
   const appEvents = api.container.lookup("service:app-events");
 
