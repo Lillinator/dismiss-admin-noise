@@ -21,3 +21,7 @@ no_upcoming_change_promoted_notifications:
 no_review_queue_badges:
   type: bool
   default: true
+
+target_admin_usernames:
+  type: string
+  default: ""
