@@ -23,7 +23,7 @@ The following notification can be automatically dismissed in the component admin
 
 * Only admin users are affected; for example non-admins will still get notified of their granted badges or accepted invites regardless of the settings enabled in this component.
 
-* Note that the `No review queue badges`  setting only affects the flag notifications if the admin is NOT a member of the moderator group. Flag count will still show in the review queue sidebar, so that admins can still keep track though.
+* Note that the `No review queue badges`  setting only affects the flag notifications if the admin is NOT a member of the moderator group. Flag count will still show in the review queue sidebar, so that admins can still  keep track of pending flags that need review.
 
 * If all of the component's setting are enabled, one can end up with an empty `other notifications tab` or `all notifications tab` depending on how busy their forum notifications are. 
 
