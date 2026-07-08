@@ -38,8 +38,7 @@
     display: none !important;
   }
 
-  .header-dropdown-toggle.current-user .badge-notification.unread-high-priority-notifications,
-  .header-dropdown-toggle.current-user .badge-notification.reviewable-count {
+  .current-user .badge-notification.new-reviewables {
     display: none !important;
   }
 }
