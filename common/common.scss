@@ -33,6 +33,8 @@
   }
 }
 
-.user-menu .user-menu-reviewable-item {
-  display: none;
+@if $no_review_queue_badges == "true" {
+  li.user-menu-reviewable-item {
+    display: none !important;
+  }
 }
