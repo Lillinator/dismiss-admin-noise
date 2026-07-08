@@ -1,5 +1,6 @@
 import { apiInitializer } from "discourse/lib/api";
 import { ajax } from "discourse/lib/ajax";
+import { debounce } from "@ember/runloop"; 
 
 export default apiInitializer("1.8", (api) => {
   const currentUser = api.getCurrentUser();
@@ -37,90 +38,37 @@ export default apiInitializer("1.8", (api) => {
 
   if (validNoisyTypes.length === 0) return;
 
-  let isEnforcing = false;
-
-  function enforceCleanUI() {
-    if (isEnforcing || !currentUser.grouped_unread_notifications) return;
-
-    let dirty = false;
-    let remainingLegitSum = 0;
-    const cleanGrouped = { ...currentUser.grouped_unread_notifications };
-
-    for (const type of validNoisyTypes) {
-      if (cleanGrouped[type] > 0) {
-        cleanGrouped[type] = 0; 
-        dirty = true;
-      }
-    }
-
-    for (const count of Object.values(cleanGrouped)) {
-      remainingLegitSum += count;
-    }
-
-    if (dirty) {
-      isEnforcing = true;
-      
-      currentUser.set("grouped_unread_notifications", cleanGrouped);
-      currentUser.set("unread_notifications", remainingLegitSum);
-      
-      appEvents.trigger("notifications:changed");
-      
-      isEnforcing = false;
-      triggerBackgroundCleanup();
-    }
-  }
-
   let isCleaning = false;
-  let needsAnotherPass = false;
 
-  async function triggerBackgroundCleanup() {
-    if (isCleaning) {
-      needsAnotherPass = true;
-      return;
-    }
-    
+  async function checkAndDismissNoisyNotifications() {
+    if (isCleaning) return;
     isCleaning = true;
 
     try {
-      do {
-        needsAnotherPass = false;
-        
-        const data = await ajax(`/notifications.json?_t=${Date.now()}`);
-        const noisy = data.notifications.filter(
-          (n) => !n.read && validNoisyTypes.includes(n.notification_type)
-        );
+      const data = await ajax(`/notifications.json?_t=${Date.now()}`);
+      const noisy = data.notifications.filter(
+        (n) => !n.read && validNoisyTypes.includes(n.notification_type)
+      );
 
-        if (noisy.length > 0) {
-          for (const n of noisy) {
-            await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
-            await new Promise((r) => setTimeout(r, 50)); 
-          }
-          needsAnotherPass = true; 
+      if (noisy.length > 0) {
+        for (const n of noisy) {
+          await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
+          
+          await new Promise((r) => setTimeout(r, 250));
         }
-      } while (needsAnotherPass); 
-      
-      await new Promise((r) => setTimeout(r, 500));
-      
-      const session = await ajax(`/session/current.json?_t=${Date.now()}`);
-      
-      if (session && session.current_user) {
-        isEnforcing = true; 
-        currentUser.setProperties({
-          unread_notifications: session.current_user.unread_notifications,
-          grouped_unread_notifications: session.current_user.grouped_unread_notifications,
-        });
-        isEnforcing = false;
+
         appEvents.trigger("notifications:changed");
       }
-
     } catch (e) {
     } finally {
       isCleaning = false;
     }
   }
 
-  currentUser.addObserver("grouped_unread_notifications", enforceCleanUI);
-  currentUser.addObserver("unread_notifications", enforceCleanUI);
-  
-  enforceCleanUI();
+  function debouncedCheck() {
+    debounce(null, checkAndDismissNoisyNotifications, 2000);
+  }
+
+  debouncedCheck();
+  currentUser.addObserver("unread_notifications", debouncedCheck);
 });
