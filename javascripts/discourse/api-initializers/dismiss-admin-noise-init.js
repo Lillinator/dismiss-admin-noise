@@ -69,7 +69,7 @@ export default apiInitializer("1.8", (api) => {
       triggerBackgroundCleanup();
     }
   }
-
+  
   let isCleaning = false;
   let needsAnotherPass = false;
 
@@ -90,16 +90,42 @@ export default apiInitializer("1.8", (api) => {
           (n) => !n.read && validNoisyTypes.includes(n.notification_type)
         );
 
-        for (const n of noisy) {
-          await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
-          await new Promise((r) => setTimeout(r, 100)); // Be gentle to the server
+        if (noisy.length > 0) {
+          for (const n of noisy) {
+            await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
+            await new Promise((r) => setTimeout(r, 100)); 
+          }
+          needsAnotherPass = true; 
         }
       } while (needsAnotherPass); 
+
+      await new Promise((r) => setTimeout(r, 500));
+      
+      const session = await ajax("/session/current.json");
+      if (session && session.current_user) {
+        isEnforcing = true; 
+        
+        currentUser.setProperties({
+          unread_notifications: session.current_user.unread_notifications,
+          grouped_unread_notifications: session.current_user.grouped_unread_notifications,
+        });
+        
+        isEnforcing = false;
+        
+        api.container.lookup("service:app-events").trigger("notifications:changed");
+      }
+
     } catch (e) {
     } finally {
       isCleaning = false;
     }
   }
+
+  currentUser.addObserver("grouped_unread_notifications", enforceCleanUI);
+  currentUser.addObserver("unread_notifications", enforceCleanUI);
+  
+  enforceCleanUI();
+});
 
   currentUser.addObserver("grouped_unread_notifications", enforceCleanUI);
   currentUser.addObserver("unread_notifications", enforceCleanUI);
