@@ -34,7 +34,7 @@
 }
 
 @if $no_review_queue_badges == "true" {
-  li.reviewable-pending {
+  li.reviewable.pending {
     display: none !important;
   }
 }
