@@ -69,7 +69,7 @@ export default apiInitializer("1.8", (api) => {
       triggerBackgroundCleanup();
     }
   }
-  
+
   let isCleaning = false;
   let needsAnotherPass = false;
 
@@ -93,7 +93,7 @@ export default apiInitializer("1.8", (api) => {
         if (noisy.length > 0) {
           for (const n of noisy) {
             await ajax(`/notifications/${n.id}`, { type: "PUT", data: { read: true } });
-            await new Promise((r) => setTimeout(r, 100)); 
+            await new Promise((r) => setTimeout(r, 100)); // Be gentle to the server
           }
           needsAnotherPass = true; 
         }
@@ -120,12 +120,6 @@ export default apiInitializer("1.8", (api) => {
       isCleaning = false;
     }
   }
-
-  currentUser.addObserver("grouped_unread_notifications", enforceCleanUI);
-  currentUser.addObserver("unread_notifications", enforceCleanUI);
-  
-  enforceCleanUI();
-});
 
   currentUser.addObserver("grouped_unread_notifications", enforceCleanUI);
   currentUser.addObserver("unread_notifications", enforceCleanUI);
