@@ -12,10 +12,10 @@ The following notification can be automatically dismissed in the component admin
 |Setting | Description|
 |--- | ---|
 | `No new features notifications` | Hide notifications for new features |
+| `No upcoming change promoted notifications` | Hide notifications for upcoming changes automatically promoted |
 | `No invitee accepted notifications` | Hide notifications for invitees accepted |
 | `No membership accepted notifications` | Hide notifications for group membership accepted (note: does not affect consolidation of membership notifications) |
 | `No granted badge notifications`  | Hide notifications for granted badges |
-| `No upcoming change promoted notifications` | Hide notifications for upcoming changes automatically promoted |
 | `No review queue badges` | Hide notifications for reviewable flags if admin is NOT a member of the moderator group |
 
 

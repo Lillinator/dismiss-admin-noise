@@ -2,6 +2,10 @@ no_new_features_notifications:
   type: bool
   default: true
 
+no_upcoming_change_promoted_notifications:
+  type: bool
+  default: true
+
 no_invitee_accepted_notifications:
   type: bool
   default: true
@@ -13,11 +17,7 @@ no_membership_accepted_notifications:
 no_granted_badge_notifications:
   type: bool
   default: true
-
-no_upcoming_change_promoted_notifications:
-  type: bool
-  default: true
-
+  
 no_review_queue_badges:
   type: bool
   default: true
