@@ -22,6 +22,6 @@ no_review_queue_badges:
   type: bool
   default: true
 
-target_admin_usernames:
+admin_usernames:
   type: string
   default: ""
