@@ -3,8 +3,8 @@ en:
     description: "Dismiss Noisy Admin Notifications"
     settings:
       no_new_features_notifications: "Hide notifications for new features"
+      no_upcoming_change_promoted_notifications: "Hide notifications for upcoming changes automatically promoted"
       no_invitee_accepted_notifications: "Hide notifications for invitees accepted"
       no_membership_accepted_notifications: "Hide notifications for group membership accepted (note: does not affect consolidation of membership notifications)"
       no_granted_badge_notifications: "Hide notifications for granted badges"
-      no_upcoming_change_promoted_notifications: "Hide notifications for upcoming changes automatically promoted"
       no_review_queue_badges: "Hide notifications for new flags in the review queue for admins who are NOT members of the moderator team"
