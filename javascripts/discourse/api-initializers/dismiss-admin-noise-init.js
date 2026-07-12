@@ -26,8 +26,23 @@ export default apiInitializer("1.8", (api) => {
 
   let isCleaning = false;
 
-  async function bulkDismissNoisyNotifications() {
+async function bulkDismissNoisyNotifications() {
     if (isCleaning || currentUser.unread_notifications === 0) return;
+
+    const unreadHash = currentUser.grouped_unread_notifications || {};
+    let hasNoisyUnread = false;
+    let removedCount = 0;
+
+    activeDismissTypes.forEach((type) => {
+      const typeId = site.notification_types[type];
+      if (typeId && unreadHash[typeId] > 0) {
+        hasNoisyUnread = true;
+        removedCount += unreadHash[typeId];
+      }
+    });
+
+    if (!hasNoisyUnread) return;
+
     isCleaning = true;
 
     try {
@@ -36,18 +51,16 @@ export default apiInitializer("1.8", (api) => {
         data: { dismiss_types: activeDismissTypes.join(",") },
       });
 
-      const unreadHash = { ...currentUser.grouped_unread_notifications };
-      let removedCount = 0;
+      const updatedHash = { ...currentUser.grouped_unread_notifications };
 
       activeDismissTypes.forEach((type) => {
         const typeId = site.notification_types[type];
-        if (typeId && unreadHash[typeId] > 0) {
-          removedCount += unreadHash[typeId];
-          delete unreadHash[typeId];
+        if (typeId && updatedHash[typeId] > 0) {
+          delete updatedHash[typeId];
         }
       });
 
-      currentUser.set("grouped_unread_notifications", unreadHash);
+      currentUser.set("grouped_unread_notifications", updatedHash);
       currentUser.set(
         "unread_notifications", 
         Math.max(0, currentUser.unread_notifications - removedCount)
@@ -56,11 +69,11 @@ export default apiInitializer("1.8", (api) => {
       appEvents.trigger("notifications:changed");
 
     } catch (e) {
+      // console.error("Failed to dismiss notifications", e);
     } finally {
       isCleaning = false;
     }
-  }
-
+  }  
   function scheduleCleanup() {
     debounce(null, bulkDismissNoisyNotifications, 1000);
   }
