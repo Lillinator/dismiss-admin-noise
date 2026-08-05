@@ -72,6 +72,7 @@ export default apiInitializer("1.8", (api) => {
       appEvents.trigger("notifications:changed");
 
     } catch (e) {
+      
     } finally {
       isCleaning = false;
     }
