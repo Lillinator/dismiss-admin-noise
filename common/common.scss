@@ -1,5 +1,4 @@
 body.dismiss-admin-noise-active {
-
   @if $no_new_features_notifications == "true" {
     li.user-menu-list-item.new-features,
     .notification.new-features {
@@ -34,7 +33,6 @@ body.dismiss-admin-noise-active {
       display: none !important;
     }
   }
-
 } 
 
 @if $no_review_queue_badges == "true" {
