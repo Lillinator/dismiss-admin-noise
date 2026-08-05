@@ -1,38 +1,44 @@
-@if $no_new_features_notifications == "true" {
-  li.user-menu-list-item.new-features,
-  .notification.new-features {
-    display: none !important;
-  }
-}
+// Wrap standard notifications in the admin body class
+body.dismiss-admin-noise-active {
 
-@if $no_invitee_accepted_notifications == "true" {
-  li.user-menu-list-item.invitee-accepted,
-  .notification.invitee-accepted {
-    display: none !important;
+  @if $no_new_features_notifications == "true" {
+    li.user-menu-list-item.new-features,
+    .notification.new-features {
+      display: none !important;
+    }
   }
-}
 
-@if $no_membership_accepted_notifications == "true" {
-  li.user-menu-list-item.membership-request-accepted,
-  .notification.membership-request-accepted {
-    display: none !important;
+  @if $no_invitee_accepted_notifications == "true" {
+    li.user-menu-list-item.invitee-accepted,
+    .notification.invitee-accepted {
+      display: none !important;
+    }
   }
-}
 
-@if $no_granted_badge_notifications == "true" {
-  li.user-menu-list-item.granted-badge,
-  .notification.granted-badge {
-    display: none !important;
+  @if $no_membership_accepted_notifications == "true" {
+    li.user-menu-list-item.membership-request-accepted,
+    .notification.membership-request-accepted {
+      display: none !important;
+    }
   }
-}
 
-@if $no_upcoming_change_promoted_notifications == "true" {
-  li.user-menu-list-item.upcoming-change-automatically-promoted,
-  .notification.upcoming-change-automatically-promoted {
-    display: none !important;
+  @if $no_granted_badge_notifications == "true" {
+    li.user-menu-list-item.granted-badge,
+    .notification.granted-badge {
+      display: none !important;
+    }
   }
-}
 
+  @if $no_upcoming_change_promoted_notifications == "true" {
+    li.user-menu-list-item.upcoming-change-automatically-promoted,
+    .notification.upcoming-change-automatically-promoted {
+      display: none !important;
+    }
+  }
+
+} // End standard notifications wrapper
+
+// Review Queue Logic (remains wrapped in its own specific body class)
 @if $no_review_queue_badges == "true" {
   
   body.hide-admin-review-queue {
