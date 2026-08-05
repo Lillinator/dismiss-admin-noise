@@ -72,7 +72,6 @@ export default apiInitializer("1.8", (api) => {
       appEvents.trigger("notifications:changed");
 
     } catch (e) {
-      // console.error("Failed to dismiss notifications", e);
     } finally {
       isCleaning = false;
     }
