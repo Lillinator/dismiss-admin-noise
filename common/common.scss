@@ -1,4 +1,3 @@
-// Wrap standard notifications in the admin body class
 body.dismiss-admin-noise-active {
 
   @if $no_new_features_notifications == "true" {
@@ -36,9 +35,8 @@ body.dismiss-admin-noise-active {
     }
   }
 
-} // End standard notifications wrapper
+} 
 
-// Review Queue Logic (remains wrapped in its own specific body class)
 @if $no_review_queue_badges == "true" {
   
   body.hide-admin-review-queue {
