@@ -9,6 +9,9 @@ export default apiInitializer("1.8", (api) => {
     return;
   }
 
+  // --- NEW: Add a body class so our SCSS knows this is an Admin! ---
+  document.body.classList.add("dismiss-admin-noise-active");
+
   if (settings.no_review_queue_badges && !currentUser.moderator) {
     document.body.classList.add("hide-admin-review-queue");
   }
@@ -16,6 +19,7 @@ export default apiInitializer("1.8", (api) => {
   const site = api.container.lookup("service:site");
   const appEvents = api.container.lookup("service:app-events");
   const activeDismissTypes = [];
+  
   if (settings.no_new_features_notifications) activeDismissTypes.push("new_features");
   if (settings.no_invitee_accepted_notifications) activeDismissTypes.push("invitee_accepted");
   if (settings.no_membership_accepted_notifications) activeDismissTypes.push("membership_request_accepted");
@@ -26,7 +30,7 @@ export default apiInitializer("1.8", (api) => {
 
   let isCleaning = false;
 
-async function bulkDismissNoisyNotifications() {
+  async function bulkDismissNoisyNotifications() {
     if (isCleaning || currentUser.unread_notifications === 0) return;
 
     const unreadHash = currentUser.grouped_unread_notifications || {};
@@ -74,6 +78,7 @@ async function bulkDismissNoisyNotifications() {
       isCleaning = false;
     }
   }  
+  
   function scheduleCleanup() {
     debounce(null, bulkDismissNoisyNotifications, 1000);
   }
