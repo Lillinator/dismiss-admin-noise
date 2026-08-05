@@ -9,7 +9,6 @@ export default apiInitializer("1.8", (api) => {
     return;
   }
 
-  // --- NEW: Add a body class so our SCSS knows this is an Admin! ---
   document.body.classList.add("dismiss-admin-noise-active");
 
   if (settings.no_review_queue_badges && !currentUser.moderator) {
